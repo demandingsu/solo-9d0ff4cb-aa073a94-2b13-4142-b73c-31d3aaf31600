@@ -1,0 +1,16 @@
+{
+  "plots": [
+    {"block_id": 1, "treatment": "A", "area": 30.0, "fresh_weight": 42.5},
+    {"block_id": 1, "treatment": "B", "area": 30.0, "fresh_weight": 47.8},
+    {"block_id": 2, "treatment": "A", "area": 28.5, "fresh_weight": 39.2},
+    {"block_id": 2, "treatment": "B", "area": 28.5, "fresh_weight": 44.6},
+    {"block_id": 3, "treatment": "A", "area": 32.0, "fresh_weight": 45.1},
+    {"block_id": 3, "treatment": "B", "area": 32.0, "fresh_weight": 49.3},
+    {"block_id": 4, "treatment": "A", "area": 30.5, "fresh_weight": 41.0},
+    {"block_id": 4, "treatment": "B", "area": 30.5, "fresh_weight": 44.9},
+    {"block_id": 5, "treatment": "A", "area": 29.0, "fresh_weight": 40.2},
+    {"block_id": 5, "treatment": "B", "area": 29.0, "fresh_weight": 45.5},
+    {"block_id": 6, "treatment": "A", "area": 31.5, "fresh_weight": 43.8},
+    {"block_id": 6, "treatment": "B", "area": 31.5, "fresh_weight": 46.0}
+  ]
+}

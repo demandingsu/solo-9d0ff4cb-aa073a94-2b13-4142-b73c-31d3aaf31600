@@ -1,0 +1,8 @@
+{
+  "entries": [
+    {"block_id": 5, "treatment": "A", "moisture": 0.61},
+    {"block_id": 5, "treatment": "B", "moisture": 0.62},
+    {"block_id": 6, "treatment": "A", "moisture": 0.63},
+    {"block_id": 6, "treatment": "B", "moisture": 0.64}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "entries": [
+    {"block_id": 1, "treatment": "A", "moisture": 0.62},
+    {"block_id": 1, "treatment": "B", "moisture": 0.63},
+    {"block_id": 2, "treatment": "A", "moisture": 0.60},
+    {"block_id": 2, "treatment": "B", "moisture": 0.61},
+    {"block_id": 3, "treatment": "A", "moisture": 0.65},
+    {"block_id": 3, "treatment": "B", "moisture": 0.64},
+    {"block_id": 4, "treatment": "A", "moisture": 0.58},
+    {"block_id": 4, "treatment": "B", "moisture": 0.59}
+  ]
+}
