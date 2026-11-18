@@ -41,6 +41,39 @@ CREATE TABLE IF NOT EXISTS publications (
     n_permutations INTEGER NOT NULL,
     payload        TEXT    NOT NULL
 );
+-- Versioned measurement-error settings.  Every actual revision inserts a new
+-- row (the highest id is the current version); an identical replacement is a
+-- no-op and reuses the current id, so reports do not go stale for nothing.
+CREATE TABLE IF NOT EXISTS error_settings (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at  TEXT    NOT NULL,
+    gain_error  REAL    NOT NULL CHECK (gain_error >= 0 AND gain_error < 1)
+);
+CREATE TABLE IF NOT EXISTS error_plot_settings (
+    settings_id    INTEGER NOT NULL,
+    block_id       INTEGER NOT NULL CHECK (block_id BETWEEN 1 AND 12),
+    treatment      TEXT    NOT NULL CHECK (treatment IN ('A', 'B')),
+    weight_error   REAL    NOT NULL CHECK (weight_error >= 0),
+    moisture_error REAL    NOT NULL CHECK (moisture_error >= 0),
+    PRIMARY KEY (settings_id, block_id, treatment)
+);
+-- Error-range reports are immutable once written; staleness is derived at
+-- read time by comparing the pinned settings/data versions with the current
+-- ones.  A failed computation rolls back and never overwrites an old report.
+CREATE TABLE IF NOT EXISTS error_reports (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at        TEXT    NOT NULL,
+    publication_id    INTEGER NOT NULL,
+    data_version      INTEGER NOT NULL,
+    error_settings_id INTEGER NOT NULL,
+    n_blocks          INTEGER NOT NULL,
+    recorded_mean_diff REAL   NOT NULL,
+    lower_bound       REAL    NOT NULL,
+    upper_bound       REAL    NOT NULL,
+    sign              TEXT    NOT NULL CHECK (sign IN ('positive', 'negative', 'indeterminate')),
+    sign_certain      INTEGER NOT NULL,
+    payload           TEXT    NOT NULL
+);
 """
 
 _write_lock = threading.Lock()
@@ -109,3 +142,36 @@ def fetch_plots(conn: sqlite3.Connection) -> list[sqlite3.Row]:
         "SELECT block_id, treatment, area, fresh_weight, moisture, updated_at"
         " FROM plots ORDER BY block_id, treatment"
     ).fetchall()
+
+
+def fetch_plot(
+    conn: sqlite3.Connection, block_id: int, treatment: str
+) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT block_id, treatment, area, fresh_weight, moisture, updated_at"
+        " FROM plots WHERE block_id = ? AND treatment = ?",
+        (block_id, treatment),
+    ).fetchone()
+
+
+def latest_error_settings_id(conn: sqlite3.Connection) -> int | None:
+    row = conn.execute("SELECT MAX(id) AS id FROM error_settings").fetchone()
+    return row["id"] if row and row["id"] is not None else None
+
+
+def fetch_error_settings(
+    conn: sqlite3.Connection, settings_id: int
+) -> tuple[sqlite3.Row | None, list[sqlite3.Row]]:
+    """Return (settings header row, per-plot rows) for one settings version."""
+    header = conn.execute(
+        "SELECT * FROM error_settings WHERE id = ?", (settings_id,)
+    ).fetchone()
+    if header is None:
+        return None, []
+    plots = conn.execute(
+        "SELECT block_id, treatment, weight_error, moisture_error"
+        " FROM error_plot_settings WHERE settings_id = ?"
+        " ORDER BY block_id, treatment",
+        (settings_id,),
+    ).fetchall()
+    return header, plots

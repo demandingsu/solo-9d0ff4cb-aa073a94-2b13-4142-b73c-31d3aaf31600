@@ -1,0 +1,17 @@
+{
+  "gain_error": 0.02,
+  "entries": [
+    {"block_id": 1, "treatment": "A", "weight_error": 0.40, "moisture_error": 0.01},
+    {"block_id": 1, "treatment": "B", "weight_error": 0.40, "moisture_error": 0.01},
+    {"block_id": 2, "treatment": "A", "weight_error": 0.35, "moisture_error": 0.01},
+    {"block_id": 2, "treatment": "B", "weight_error": 0.35, "moisture_error": 0.01},
+    {"block_id": 3, "treatment": "A", "weight_error": 0.45, "moisture_error": 0.015},
+    {"block_id": 3, "treatment": "B", "weight_error": 0.45, "moisture_error": 0.015},
+    {"block_id": 4, "treatment": "A", "weight_error": 0.38, "moisture_error": 0.01},
+    {"block_id": 4, "treatment": "B", "weight_error": 0.38, "moisture_error": 0.01},
+    {"block_id": 5, "treatment": "A", "weight_error": 0.42, "moisture_error": 0.012},
+    {"block_id": 5, "treatment": "B", "weight_error": 0.42, "moisture_error": 0.012},
+    {"block_id": 6, "treatment": "A", "weight_error": 0.40, "moisture_error": 0.01},
+    {"block_id": 6, "treatment": "B", "weight_error": 0.40, "moisture_error": 0.01}
+  ]
+}

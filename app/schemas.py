@@ -84,6 +84,50 @@ class CorrectionRequest(BaseModel):
         return self
 
 
+# ---------- measurement-error settings ----------
+
+class PlotErrorEntry(BaseModel):
+    """Per-plot independent absolute error magnitudes."""
+
+    block_id: int = Field(ge=1, le=12)
+    treatment: Treatment
+    weight_error: float = Field(
+        ge=0, description="absolute weighing error magnitude, kg"
+    )
+    moisture_error: float = Field(
+        ge=0, description="absolute moisture assay error magnitude, fraction"
+    )
+
+
+class ErrorSettingsRequest(BaseModel):
+    """A full replacement of the measurement-error settings.
+
+    ``gain_error`` is the experiment-wide relative scale-gain error e:
+    the single shared gain lies in [1-e, 1+e], so 0 <= e < 1.
+    """
+
+    gain_error: float = Field(ge=0, lt=1)
+    entries: list[PlotErrorEntry] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _no_duplicates(self) -> "ErrorSettingsRequest":
+        keys = [(e.block_id, e.treatment) for e in self.entries]
+        if len(keys) != len(set(keys)):
+            raise ValueError("duplicate (block_id, treatment) in request")
+        return self
+
+
+class ErrorSettingsResponse(BaseModel):
+    id: int = Field(description="settings version id; bumps on every real revision")
+    created_at: str
+    gain_error: float
+    entries: list[PlotErrorEntry]
+    changed: bool = Field(
+        default=False,
+        description="false when the request matched the current settings exactly",
+    )
+
+
 # ---------- responses ----------
 
 class MutationResponse(BaseModel):
@@ -149,3 +193,37 @@ class Publication(PublicationSummary):
     blocks: list[BlockComplete]
     pending: list[BlockPending]
     provenance: Provenance
+
+
+# ---------- error-range reports ----------
+
+class ErrorReportBlock(BaseModel):
+    block_id: int
+    recorded_diff: float = Field(description="published B - A diff without errors")
+
+
+class ErrorReportSummary(BaseModel):
+    id: int
+    created_at: str
+    publication_id: int
+    data_version: int
+    error_settings_id: int
+    n_blocks: int
+    recorded_mean_diff: float
+    lower_bound: float
+    upper_bound: float
+    sign: Literal["positive", "negative", "indeterminate"]
+    sign_certain: bool
+    stale: bool
+    stale_reasons: list[str]
+
+
+class ErrorReport(ErrorReportSummary):
+    gain_bounds: tuple[float, float] = Field(
+        description="shared gain interval [1-e, 1+e]"
+    )
+    blocks: list[ErrorReportBlock] = Field(
+        description="the publication's participating blocks"
+    )
+    error_settings: ErrorSettingsResponse
+    publication_provenance: Provenance
